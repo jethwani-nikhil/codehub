@@ -48,7 +48,7 @@ while True:
 
             # Send the email using Gmail
             subject = 'Notification from Your College'
-            
+
             # Use Unicode encoding for the body
             body = MIMEText(f"To: {recipient_email}\nSubject: {subject}\n\n{message}", _charset="utf-8")
 
@@ -65,18 +65,31 @@ while True:
             with open(file_path, "w", encoding="utf-8") as file:
                 json.dump(previous_notification, file, ensure_ascii=False)
 
-            # Print the notification or no new news and sleep for 10 minutes before checking again
-            if content != "No content available":
-                print(f"Notification sent:\n{message}")
-            else:
-                print("No new news. Notification sent.")
+            # Print the notification
+            print(f"Notification sent:\n{message}")
+
+        else:
+            # If there is no new notification, send a message indicating that
+            print("No new news received. Sending a notification.")
+
+            # Send the email using Gmail for the "no new news" case
+            no_news_message = "No new news available."
+            no_news_subject = 'No New Notification from Your College'
+            no_news_body = MIMEText(f"To: {recipient_email}\nSubject: {no_news_subject}\n\n{no_news_message}", _charset="utf-8")
+
+            # Connect to Gmail's SMTP server for the "no new news" case
+            with smtplib.SMTP('smtp.gmail.com', 587) as server:
+                server.starttls()
+                server.login(gmail_username, gmail_password)
+
+                # Send the email for the "no new news" case
+                server.sendmail(gmail_username, recipient_email, no_news_body.as_string())
 
         # Sleep for 10 minutes before checking again
-        time.sleep(600)
-        
+        time.sleep(60)
 
     except Exception as e:
         # Handle exceptions, e.g., network errors or issues with the website
         print(f"An error occurred: {str(e)}")
         # Sleep for 10 minutes before retrying
-        time.sleep(600)
+        time.sleep(60)
